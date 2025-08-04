@@ -1,0 +1,11 @@
+#card-dashboard{
+    height:165px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    
+}
+#card-bedge{
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+}
