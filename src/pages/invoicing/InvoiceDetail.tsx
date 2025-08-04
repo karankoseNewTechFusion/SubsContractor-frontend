@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowBack, Edit, Download, Send, Delete } from '@mui/icons-material';
+import { ArrowBack, Edit, Download, Send, Delete, Payment, MoreVert } from '@mui/icons-material';
 import CustomButton from '../../components/Button';
+import CreateInvoice from './CreateInvoice';
 
 interface InvoiceItem {
   description: string;
@@ -30,6 +31,15 @@ const InvoiceDetail = () => {
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showMoreActions, setShowMoreActions] = useState(false);
+  const [showCollectPaymentModal, setShowCollectPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [paymentData, setPaymentData] = useState({
+    method: 'Cash',
+    amount: '',
+    transactionDate: new Date().toISOString().split('T')[0],
+    details: ''
+  });
 
   useEffect(() => {
     // Load invoice data from localStorage
@@ -50,8 +60,8 @@ const InvoiceDetail = () => {
               email: "billing@acme.com",
               date: "Jan 15, 2024",
               dueDate: "Feb 15, 2024",
-              amount: "$5,000.00",
-              remainingBalance: "$0.00",
+              amount: "₹5,000.00",
+              remainingBalance: "₹0.00",
               status: "Paid",
               billingAddress: "123 Business St, City, State 12345",
               notes: "Payment received on time. Thank you for your business!",
@@ -66,8 +76,8 @@ const InvoiceDetail = () => {
               email: "finance@techstart.com",
               date: "Jan 20, 2024",
               dueDate: "Feb 20, 2024",
-              amount: "$3,200.00",
-              remainingBalance: "$3,200.00",
+              amount: "₹3,200.00",
+              remainingBalance: "₹3,200.00",
               status: "Unpaid",
               billingAddress: "456 Tech Ave, City, State 12345",
               notes: "Please pay within 30 days of invoice date.",
@@ -82,8 +92,8 @@ const InvoiceDetail = () => {
               email: "accounts@globalsolutions.com",
               date: "Jan 25, 2024",
               dueDate: "Feb 25, 2024",
-              amount: "$8,750.00",
-              remainingBalance: "$4,375.00",
+              amount: "₹8,750.00",
+              remainingBalance: "₹4,375.00",
               status: "Unpaid",
               billingAddress: "789 Global Blvd, City, State 12345",
               notes: "Partial payment received. Remaining balance due.",
@@ -98,8 +108,8 @@ const InvoiceDetail = () => {
               email: "finance@innovationlabs.com",
               date: "Jan 28, 2024",
               dueDate: "Feb 28, 2024",
-              amount: "$1,800.00",
-              remainingBalance: "$0.00",
+              amount: "₹1,800.00",
+              remainingBalance: "₹0.00",
               status: "Paid",
               billingAddress: "321 Innovation Dr, City, State 12345",
               notes: "Project completed successfully. Payment received.",
@@ -129,8 +139,7 @@ const InvoiceDetail = () => {
   };
 
   const handleEdit = () => {
-    // Navigate to edit page (future implementation)
-    console.log('Edit invoice:', invoiceId);
+    setShowEditModal(true);
   };
 
   const handleDownload = () => {
@@ -151,6 +160,34 @@ const InvoiceDetail = () => {
       // Navigate back
       navigate(-1);
     }
+  };
+
+  const handleCollectPayment = () => {
+    // Convert dollar amount to rupee format and remove the rupee symbol from the value
+    const remainingBalance = invoice?.remainingBalance || '';
+    const rupeeAmount = remainingBalance.replace('$', '').replace('₹', ''); // Remove both $ and ₹ symbols
+    
+    setPaymentData({
+      method: 'Cash',
+      amount: rupeeAmount,
+      transactionDate: new Date().toISOString().split('T')[0],
+      details: `Payment applied to Invoice #{invoice?.invoiceNumber}`
+    });
+    setShowCollectPaymentModal(true);
+  };
+
+  const handlePaymentSave = () => {
+    console.log('Saving payment:', paymentData);
+    // Here you would typically save the payment to your backend
+    setShowCollectPaymentModal(false);
+    // Update invoice status if needed
+  };
+
+  const handlePaymentSaveAndEmail = () => {
+    console.log('Saving payment and sending email receipt:', paymentData);
+    // Here you would typically save the payment and send email receipt
+    setShowCollectPaymentModal(false);
+    // Update invoice status if needed
   };
 
   const getStatusColor = (status: string) => {
@@ -183,188 +220,645 @@ const InvoiceDetail = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="w-full max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <CustomButton
-              leftIcon={<ArrowBack />}
-              color="#F0F1F4"
-              textColor="#374151"
-              className="px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              onClick={handleBack}
-            >
-              Back
-            </CustomButton>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Invoice Details
-              </h1>
-              <p className="text-gray-600 text-lg">
-                {invoice.invoiceNumber}
-              </p>
-            </div>
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: 16,
+        boxShadow: "0 4px 32px rgba(0,0,0,0.10)",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header Row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "#f7f9fa",
+          padding: "12px 15px 12px",
+          borderBottom: "1px solid #f0f0f0",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: 32,
+              fontWeight: 700,
+              marginBottom: 8,
+              color: "#222",
+            }}
+          >
+            Invoice Details
           </div>
-          <div className="flex gap-3">
-            <CustomButton
-              leftIcon={<Edit />}
-              color="#F0F1F4"
-              textColor="#374151"
-              className="px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              onClick={handleEdit}
-            >
-              Edit
-            </CustomButton>
-            <CustomButton
-              leftIcon={<Download />}
-              color="#F0F1F4"
-              textColor="#374151"
-              className="px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              onClick={handleDownload}
-            >
-              Download
-            </CustomButton>
-            <CustomButton
-              leftIcon={<Send />}
-              color="#F0F1F4"
-              textColor="#374151"
-              className="px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              onClick={handleSend}
-            >
-              Send
-            </CustomButton>
-            <CustomButton
-              leftIcon={<Delete />}
-              color="#FEF2F2"
-              textColor="#DC2626"
-              className="px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors"
-              onClick={handleDelete}
-            >
-              Delete
-            </CustomButton>
+          <div style={{ color: "#666", fontSize: 18 }}>
+            {invoice.invoiceNumber}
           </div>
         </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <CustomButton
+            leftIcon={<Payment style={{ fontSize: 18 }} />}
+            style={{
+              background: "#10B981",
+              color: "#ffffff",
+              borderRadius: 8,
+              fontWeight: 600,
+              padding: "6px 14px",
+              fontSize: 14,
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              transition: "background 0.2s, color 0.2s",
+            }}
+            className="custom-action-btn"
+            onClick={handleCollectPayment}
+          >
+            Collect Payment
+          </CustomButton>
+          <div className="relative">
+            <CustomButton
+              leftIcon={<MoreVert style={{ fontSize: 18 }} />}
+              style={{
+                background: "#f4f5f7",
+                color: "#2563eb",
+                borderRadius: 8,
+                fontWeight: 600,
+                padding: "6px 14px",
+                fontSize: 14,
+                boxShadow: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                transition: "background 0.2s, color 0.2s",
+              }}
+              className="custom-action-btn"
+              onClick={() => setShowMoreActions(!showMoreActions)}
+            >
+              More Actions
+            </CustomButton>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Invoice Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Invoice Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Number</label>
-                  <p className="text-lg font-semibold text-gray-900">{invoice.invoiceNumber}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(invoice.status)}`}>
-                    {invoice.status}
-                  </span>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Date</label>
-                  <p className="text-gray-900">{invoice.date}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
-                  <p className="text-gray-900">{invoice.dueDate}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-                  <p className="text-lg font-semibold text-blue-600">{invoice.amount}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Remaining Balance</label>
-                  <p className="text-lg font-semibold text-gray-900">{invoice.remainingBalance}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Client Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Client Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
-                  <p className="text-gray-900">{invoice.client}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <p className="text-gray-900">{invoice.email}</p>
-                </div>
-                {invoice.billingAddress && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Billing Address</label>
-                    <p className="text-gray-900">{invoice.billingAddress}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Line Items */}
-            {invoice.items && invoice.items.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Line Items</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Description</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-700">Quantity</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-700">Unit Price</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-700">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoice.items.map((item, index) => (
-                        <tr key={index} className="border-b border-gray-100">
-                          <td className="py-3 px-4 text-gray-900">{item.description}</td>
-                          <td className="py-3 px-4 text-right text-gray-900">{item.quantity}</td>
-                          <td className="py-3 px-4 text-right text-gray-900">${item.unitPrice.toFixed(2)}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-gray-900">${item.total.toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {showMoreActions && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 44,
+                  right: 0,
+                  background: "#fff",
+                  border: "1px solid #eee",
+                  borderRadius: 8,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  zIndex: 10,
+                  minWidth: 180,
+                }}
+              >
+                <div style={{ padding: "4px" }}>
+                  <button
+                    onClick={() => {
+                      handleEdit();
+                      setShowMoreActions(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      fontSize: 14,
+                      color: "#222",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    <Edit style={{ fontSize: 16 }} />
+                    Edit Invoice
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Download invoice:', invoiceId);
+                      setShowMoreActions(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      fontSize: 14,
+                      color: "#222",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    <Download style={{ fontSize: 16 }} />
+                    Download PDF
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Send invoice:', invoiceId);
+                      setShowMoreActions(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      fontSize: 14,
+                      color: "#222",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    <Send style={{ fontSize: 16 }} />
+                    Send to Client
+                  </button>
+                  <div style={{ borderTop: "1px solid #eee", margin: "4px 0" }}></div>
+                  <button
+                    onClick={() => {
+                      handleDelete();
+                      setShowMoreActions(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      fontSize: 14,
+                      color: "#dc2626",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#fef2f2"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    <Delete style={{ fontSize: 16 }} />
+                    Delete Invoice
+                  </button>
                 </div>
               </div>
             )}
-
-            {/* Notes */}
-            {invoice.notes && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Notes</h3>
-                <p className="text-gray-700">{invoice.notes}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Summary Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Total Amount</span>
-                  <span className="text-lg font-semibold text-blue-600">{invoice.amount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Status</span>
-                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
-                    {invoice.status}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Remaining Balance</span>
-                  <span className="text-lg font-semibold text-gray-900">{invoice.remainingBalance}</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
+
+      <div style={{ padding: 15 }}>
+        {/* Invoice Details Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: 24,
+            marginBottom: 32,
+          }}
+        >
+          {/* Client Information Card */}
+          <div
+            style={{
+              background: "#f8fafc",
+              borderRadius: 12,
+              padding: 20,
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: "#374151",
+                marginBottom: 12,
+              }}
+            >
+              Client Information
+            </div>
+            <div style={{ fontSize: 15, color: "#4b5563" }}>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Name:</strong> {invoice.client}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Email:</strong> {invoice.email}
+              </div>
+              {invoice.billingAddress && (
+                <div>
+                  <strong>Address:</strong> {invoice.billingAddress}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Invoice Status Card */}
+          <div
+            style={{
+              background: "#f8fafc",
+              borderRadius: 12,
+              padding: 20,
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: "#374151",
+                marginBottom: 12,
+              }}
+            >
+              Invoice Status
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 16,
+              }}
+            >
+              <span
+                style={{
+                  background: invoice.status === 'Paid' ? "#22c55e" : 
+                             invoice.status === 'Unpaid' ? "#ef4444" : "#2563eb",
+                  color: "#fff",
+                  borderRadius: 20,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  padding: "6px 16px",
+                }}
+              >
+                {invoice.status}
+              </span>
+            </div>
+            <div style={{ fontSize: 15, color: "#4b5563" }}>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Created:</strong> {invoice.date}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Due Date:</strong> {invoice.dueDate}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Amount:</strong> {invoice.amount}
+              </div>
+              <div>
+                <strong>Remaining:</strong> {invoice.remainingBalance}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes Section */}
+        {invoice.notes && (
+          <div style={{ marginBottom: 32 }}>
+            <div
+              style={{
+                background: "#f8fafc",
+                borderRadius: 12,
+                padding: 20,
+                border: "1px solid #e5e7eb",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: "#374151",
+                  marginBottom: 8,
+                }}
+              >
+                Notes
+              </div>
+              <div style={{ fontSize: 15, color: "#4b5563" }}>
+                {invoice.notes}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Line Items */}
+        {invoice.items && invoice.items.length > 0 && (
+          <>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 20,
+                margin: "32px 0 14px 0",
+                color: "#222",
+              }}
+            >
+              Line Items
+            </div>
+            <div
+              style={{
+                border: "1px solid #e0e0e0",
+                borderRadius: 12,
+                padding: 18,
+                marginBottom: 18,
+                background: "#fafbfc",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: 10,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  color: "#222",
+                }}
+              >
+                <div style={{ flex: 2 }}>Description</div>
+                <div style={{ flex: 1, textAlign: "center" }}>Qty</div>
+                <div style={{ flex: 1, textAlign: "center" }}>Unit Price</div>
+                <div style={{ flex: 1, textAlign: "center" }}>Total</div>
+              </div>
+              {invoice.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: 8,
+                    fontSize: 15,
+                  }}
+                >
+                  <div style={{ flex: 2 }}>{item.description}</div>
+                  <div style={{ flex: 1, textAlign: "center" }}>
+                    {item.quantity}
+                  </div>
+                  <div style={{ flex: 1, textAlign: "center" }}>
+                    ₹{item.unitPrice.toFixed(2)}
+                  </div>
+                  <div style={{ flex: 1, textAlign: "center", fontWeight: 600 }}>
+                    ₹{item.total.toFixed(2)}
+                  </div>
+                </div>
+              ))}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  marginTop: 12,
+                  fontWeight: 700,
+                  fontSize: 17,
+                  color: "#222",
+                }}
+              >
+                Total: {invoice.amount}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Edit Invoice Modal */}
+      {showEditModal && invoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto m-4">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Edit Invoice - {invoice.invoiceNumber}
+              </h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <CreateInvoice
+                clientId={invoice.id.toString()}
+                onClose={() => setShowEditModal(false)}
+                onInvoiceCreated={() => {
+                  setShowEditModal(false);
+                  // Navigate to the updated invoice detail page
+                  navigate(`/invoicing/${invoice.id}`);
+                }}
+                isEdit={true}
+                editData={invoice}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collect Payment Modal */}
+      {showCollectPaymentModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: 24,
+              width: '90%',
+              maxWidth: 500,
+              maxHeight: '90vh',
+              overflow: 'auto',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: '#0f766e',
+                marginBottom: 24,
+                textAlign: 'center',
+              }}
+            >
+              Collect payment
+            </div>
+
+            {/* Payment Details Section */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: '#374151' }}>
+                  Method
+                </label>
+                <select
+                  value={paymentData.method}
+                  onChange={(e) => setPaymentData({ ...paymentData, method: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: '#fff',
+                  }}
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Check">Check</option>
+                  <option value="PayPal">PayPal</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: '#374151' }}>
+                  Amount
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>
+                    ₹
+                  </span>
+                  <input
+                    type="text"
+                    value={paymentData.amount}
+                    onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 12px 12px 32px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      fontSize: 14,
+                    }}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: '#374151' }}>
+                  Transaction date
+                </label>
+                <input
+                  type="date"
+                  value={paymentData.transactionDate}
+                  onChange={(e) => setPaymentData({ ...paymentData, transactionDate: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: '#374151' }}>
+                  Details
+                </label>
+                <textarea
+                  value={paymentData.details}
+                  onChange={(e) => setPaymentData({ ...paymentData, details: e.target.value })}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    resize: 'vertical',
+                  }}
+                  placeholder="Payment details..."
+                />
+              </div>
+            </div>
+
+            {/* Client Details Section */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontWeight: 700, color: '#374151', marginBottom: 12 }}>
+                Client details
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ color: '#6b7280' }}>Invoice balance:</span>
+                <span style={{ fontWeight: 600, color: '#374151' }}>{invoice?.remainingBalance}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>Account balance:</span>
+                <span style={{ fontWeight: 600, color: '#374151' }}>
+                  ₹{(parseFloat(invoice?.remainingBalance?.replace('₹', '').replace(',', '') || '0') + 147400).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowCollectPaymentModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: 8,
+                  backgroundColor: '#fff',
+                  color: '#374151',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePaymentSaveAndEmail}
+                style={{
+                  padding: '10px 20px',
+                  border: '1px solid #10b981',
+                  borderRadius: 8,
+                  backgroundColor: '#fff',
+                  color: '#10b981',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
+              >
+                Save and Email Receipt
+              </button>
+              <button
+                onClick={handlePaymentSave}
+                style={{
+                  padding: '10px 20px',
+                  border: 'none',
+                  borderRadius: 8,
+                  backgroundColor: '#10b981',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

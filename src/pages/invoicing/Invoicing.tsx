@@ -395,7 +395,11 @@ const Invoicing = () => {
                 {filteredInvoices.map((invoice) => {
                   const statusColors = getStatusColor(invoice.status);
                   return (
-                    <tr key={invoice.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={invoice.id} 
+                      className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                      onClick={() => navigate(`/invoicing/${invoice.id}`)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {invoice.invoiceNumber}
                       </td>

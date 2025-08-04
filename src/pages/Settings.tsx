@@ -66,7 +66,7 @@ const Settings = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex-1 px-6 py-4 text-base font-medium transition-colors ${
                   activeTab === tab.key
-                    ? 'bg-blue-600 text-white border-b-2 border-blue-600'
+                    ? 'bg-gray-200 text-black border-b-2 border-white-600'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
