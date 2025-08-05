@@ -1,6 +1,7 @@
-import React from 'react';
-import { KeyboardArrowDown, Close } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { KeyboardArrowDown, Close, Delete } from '@mui/icons-material';
 import CustomButton from '../../components/Button';
+import CreateTaskModal from './CreateTaskModal';
 
 interface JobContentProps {
   selectedOption: string;
@@ -29,7 +30,9 @@ const JobContent: React.FC<JobContentProps> = ({
   selectedCrew,
   setSelectedCrew
 }) => {
-  const tasks = [
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const [tasks, setTasks] = useState([
     {
       title: 'Remove Old Cabinets',
       description: 'Carefully Remove Existing Kitchen Cabinets And Dispose Of Materials',
@@ -54,7 +57,41 @@ const JobContent: React.FC<JobContentProps> = ({
       status: 'Overdue',
       hours: '2/4h',
     },
-  ];
+  ]);
+
+  const handleAddTask = () => {
+    setEditingTask(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleEditTask = (task: any) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleDeleteTask = (taskIndex: number) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      setTasks(prev => prev.filter((_, index) => index !== taskIndex));
+    }
+  };
+
+  const handleSaveTask = (taskData: any) => {
+    if (editingTask) {
+      // Edit existing task
+      setTasks(prev => prev.map((task, index) => 
+        task === editingTask ? { ...task, ...taskData, hours: `0/${taskData.estimatedHours}h` } : task
+      ));
+    } else {
+      // Add new task
+      const newTask = {
+        id: Date.now(),
+        ...taskData,
+        status: 'Pending',
+        hours: `0/${taskData.estimatedHours}h`
+      };
+      setTasks(prev => [...prev, newTask]);
+    }
+  };
 
   const filteredTasks = selectedTaskFilter === 'All Tasks' 
     ? tasks 
@@ -203,6 +240,7 @@ const JobContent: React.FC<JobContentProps> = ({
               color="#3B82F6"
               textColor="#ffffff"
               className="px-4 py-2 rounded-lg font-medium"
+              onClick={handleAddTask}
             >
               Add Task
             </CustomButton>
@@ -210,7 +248,9 @@ const JobContent: React.FC<JobContentProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {filteredTasks.map((task, idx) => (
+          {filteredTasks.map((task, idx) => {
+            const taskIndex = tasks.findIndex(t => t === task);
+            return (
             <div key={idx} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <div className="flex justify-between items-start mb-3">
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
@@ -235,18 +275,34 @@ const JobContent: React.FC<JobContentProps> = ({
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{task.hours}</span>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                  <button 
+                    className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center gap-1"
+                    onClick={() => handleDeleteTask(taskIndex)}
+                  >
+                    <Delete className="w-3 h-3" />
                     Delete
                   </button>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                  <button 
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onClick={() => handleEditTask(task)}
+                  >
                     Edit
                   </button>
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
+
+      <CreateTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSave={handleSaveTask}
+        editData={editingTask}
+        crewList={crewList}
+      />
     </div>
   );
 
@@ -289,52 +345,124 @@ const JobContent: React.FC<JobContentProps> = ({
 
       {/* Crew Modal */}
       {crewModalOpen && selectedCrew && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6 relative">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              onClick={() => setCrewModalOpen(false)}
-            >
-              <Close />
-            </button>
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`w-16 h-16 ${selectedCrew.color} rounded-full flex items-center justify-center`}>
-                <span className={`${selectedCrew.textColor} font-semibold text-2xl`}>{selectedCrew.initials}</span>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-xl">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className={`w-20 h-20 ${selectedCrew.color} rounded-full flex items-center justify-center shadow-lg`}>
+                    <span className={`${selectedCrew.textColor} font-bold text-3xl`}>{selectedCrew.initials}</span>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedCrew.name}</h2>
+                    <p className="text-lg text-gray-600 font-medium">{selectedCrew.role}</p>
+                    <p className="text-gray-500">{selectedCrew.email}</p>
+                  </div>
+                </div>
+                <button
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold p-2 hover:bg-gray-100 rounded-full"
+                  onClick={() => setCrewModalOpen(false)}
+                >
+                  ×
+                </button>
               </div>
+              
+              {/* Status and Rating */}
+              <div className="flex gap-3 mt-4">
+                <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex items-center gap-2">
+                  <span className="text-yellow-500 text-lg">★</span>
+                  <span>{selectedCrew.rating} Rating</span>
+                </span>
+                <span className={`px-4 py-2 ${selectedCrew.statusColor} rounded-full text-sm font-medium flex items-center gap-2`}>
+                  <div className={`w-3 h-3 ${selectedCrew.statusDot} rounded-full`}></div>
+                  {selectedCrew.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Current Tasks */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  Current Task Assignments
+                </h3>
+                {(() => {
+                  const assignedTasks = tasks.filter(task => task.assignedTo === selectedCrew.name);
+                  return assignedTasks.length > 0 ? (
+                    <div className="space-y-3">
+                      {assignedTasks.map((task, index) => (
+                        <div key={index} className="bg-white rounded-lg p-3 border border-blue-200">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium text-gray-900">{task.title}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              task.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                              task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                              task.status === 'Overdue' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {task.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+                          <div className="flex justify-between items-center text-sm text-gray-500">
+                            <span>Due: {task.dueDate}</span>
+                            <span>{task.hours}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 text-center py-4">No tasks currently assigned to this crew member.</p>
+                  );
+                })()}
+              </div>
+
+              {/* Current Projects */}
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{selectedCrew.name}</h2>
-                <p className="text-gray-600">{selectedCrew.role}</p>
-                <p className="text-gray-500 text-sm">{selectedCrew.email}</p>
-                <div className="flex gap-2 mt-2">
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm flex items-center gap-1">
-                    <span className="text-yellow-500">★</span>
-                    {selectedCrew.rating}
-                  </span>
-                  <span className={`px-3 py-1 ${selectedCrew.statusColor} rounded-full text-sm flex items-center gap-1`}>
-                    <div className={`w-2 h-2 ${selectedCrew.statusDot} rounded-full`}></div>
-                    {selectedCrew.status}
-                  </span>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Current Projects
+                </h3>
+                {selectedCrew.projects.length > 0 ? (
+                  <div className="grid gap-3">
+                    {selectedCrew.projects.map((proj: { title: string; hours: number }, i: number) => (
+                      <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{proj.title}</h4>
+                            <p className="text-sm text-gray-600">Project Assignment</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-lg font-bold text-blue-600">{proj.hours}h</span>
+                            <p className="text-sm text-gray-500">Hours Worked</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4 bg-gray-50 rounded-lg">No active projects assigned.</p>
+                )}
+              </div>
+
+              {/* Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-4">
+                  <h4 className="text-sm font-medium opacity-90">Total Hours</h4>
+                  <p className="text-2xl font-bold">{selectedCrew.totalHours}h</p>
+                </div>
+                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-4">
+                  <h4 className="text-sm font-medium opacity-90">Active Projects</h4>
+                  <p className="text-2xl font-bold">{selectedCrew.projects.length}</p>
+                </div>
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-4">
+                  <h4 className="text-sm font-medium opacity-90">Current Tasks</h4>
+                  <p className="text-2xl font-bold">{tasks.filter(task => task.assignedTo === selectedCrew.name).length}</p>
                 </div>
               </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Projects</h3>
-              {selectedCrew.projects.length > 0 ? (
-                <ul className="space-y-2">
-                  {selectedCrew.projects.map((proj: { title: string; hours: number }, i: number) => (
-                    <li key={i} className="flex justify-between items-center">
-                      <span className="text-gray-700">{proj.title}</span>
-                      <span className="text-sm text-gray-500">{proj.hours}h</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm">No active projects.</p>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Total Hours Worked</h3>
-              <p className="text-2xl font-bold text-blue-600">{selectedCrew.totalHours}h</p>
             </div>
           </div>
         </div>
