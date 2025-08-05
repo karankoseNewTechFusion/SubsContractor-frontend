@@ -10,15 +10,18 @@ const JobsContent = () => {
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const navigate = useNavigate();
 
-    const statusOptions = [
+  // Debug log
+  console.log('JobsContent - isCreateJobModalOpen:', isCreateJobModalOpen);
+
+  const statusOptions = [
     'All Status',
     'Active',
     'Pending',
     'Completed'
   ];
 
-  // Job data with status
-  const jobData = [
+  // Job data with status - moved to state to allow updates
+  const [jobData, setJobData] = useState([
     {
       id: 1,
       title: "Office Buildout",
@@ -69,7 +72,7 @@ const JobsContent = () => {
       profit: "$0",
       expenses: "$2,000"
     }
-  ];
+  ]);
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
@@ -82,10 +85,19 @@ const JobsContent = () => {
     : jobData.filter(job => job.status === selectedStatus);
 
   const handleAddNewJob = (newJob: any) => {
+    console.log('Adding new job:', newJob);
     // Add the new job to the jobData array
-    jobData.push(newJob);
-    // Force re-render by updating the state
-    setSelectedStatus(selectedStatus);
+    setJobData(prev => [...prev, newJob]);
+  };
+
+  const handleOpenModal = () => {
+    console.log('Opening modal...');
+    setIsCreateJobModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    console.log('Closing modal...');
+    setIsCreateJobModalOpen(false);
   };
 
   return (
@@ -107,7 +119,7 @@ const JobsContent = () => {
           color="#3B82F6"
           textColor="#ffffff"
           className="px-6 py-3 rounded-lg font-medium"
-          onClick={() => setIsCreateJobModalOpen(true)}
+          onClick={handleOpenModal}
         >
           New Job
         </CustomButton>
@@ -201,7 +213,7 @@ const JobsContent = () => {
             <div 
               key={job.id} 
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-              onClick={() => navigate(`/jobs/${job.id}/job-overview`)}
+              onClick={() => navigate(`/jobs/${job.id}`)}
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -242,7 +254,7 @@ const JobsContent = () => {
       {/* Create Job Modal */}
       <CreateJobModal
         isOpen={isCreateJobModalOpen}
-        onClose={() => setIsCreateJobModalOpen(false)}
+        onClose={handleCloseModal}
         onSave={handleAddNewJob}
       />
     </>

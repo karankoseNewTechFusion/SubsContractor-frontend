@@ -11,8 +11,7 @@ import EstimateDetail from "../src/pages/estimate/EstimateDetail";
 import TemplateManager from "../src/pages/estimate/TemplateManager";
 import BidInvites from "./pages/BidInvites";
 import Jobs from "../src/pages/jobs/Jobs";
-import JobOverview from "../src/pages/jobs/JobOverview";
-import JobTabWrapper from "../src/pages/jobs/JobTabWrapper";
+import JobDetails from "../src/pages/jobs/JobDetails";
 import Scheduling from "./pages/Scheduling";
 import Materials from "./pages/Materials";
 // import JobNotes from './pages/JobNotes';
@@ -76,37 +75,18 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "bid-invites", element: <BidInvites /> },
-      {
-        path: "jobs",
+      { 
+        path: "jobs", 
         element: <Jobs />,
         children: [
-          {
-            path: ":id",
-            element: <JobOverview />,
-            children: [
-              {
-                path: "job-overview",
-                element: <JobTabWrapper tabType="overview" />,
-              },
-              {
-                path: "job-progress",
-                element: <JobTabWrapper tabType="progress" />,
-              },
-              {
-                path: "job-messages",
-                element: <JobTabWrapper tabType="messages" />,
-              },
-              {
-                path: "job-documents",
-                element: <JobTabWrapper tabType="documents" />,
-              },
-              {
-                path: "job-payments",
-                element: <JobTabWrapper tabType="payments" />,
-              },
-            ],
-          },
-        ],
+          { path: ":id", element: <JobDetails /> },
+          { path: ":id/task", element: <JobDetails /> },
+          { path: ":id/crew", element: <JobDetails /> },
+          { path: ":id/document", element: <JobDetails /> },
+          { path: ":id/expenses", element: <JobDetails /> },
+          { path: ":id/profit", element: <JobDetails /> },
+          { path: ":id/notes", element: <JobDetails /> }
+        ]
       },
       { path: "scheduling", element: <Scheduling /> },
       { path: "materials", element: <Materials /> },

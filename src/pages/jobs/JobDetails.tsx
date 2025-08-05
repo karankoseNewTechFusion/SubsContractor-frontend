@@ -1,131 +1,135 @@
-import React from 'react';
-import { Work, Add, Search, KeyboardArrowDown, ArrowBack, Edit } from '@mui/icons-material';
-import CustomButton from '../../components/Button';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import JobHeader from './JobHeader';
+import FinancialCards from './FinancialCards';
+import JobDropdown from './JobDropdown';
+import JobContent from './JobContent';
+import EditJobModal from './EditJobModal';
+import { jobData as initialJobData, crewList } from './data/jobData';
 
-const JobDetails = () => {
+const JobDetails: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // State management
+  const [jobData, setJobData] = useState(initialJobData);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState('Job Details');
+  const [isTaskFilterOpen, setIsTaskFilterOpen] = useState(false);
+  const [selectedTaskFilter, setSelectedTaskFilter] = useState('All Tasks');
+  const [crewModalOpen, setCrewModalOpen] = useState(false);
+  const [selectedCrew, setSelectedCrew] = useState<any>(null);
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [jobToEdit, setJobToEdit] = useState<any>(null);
+
+  // Find the job based on ID
+  const job = jobData.find((j: any) => j.id === Number(id));
+
+  // Handle job save
+  const handleSave = (updatedJobData: any) => {
+    console.log('Updated job data:', updatedJobData);
+    
+    // Update the job in the state
+    setJobData(prevJobData => 
+      prevJobData.map((job: any) => 
+        job.id === updatedJobData.id ? updatedJobData : job
+      )
+    );
+    
+    setIsCreateJobModalOpen(false);
+    setJobToEdit(null);
+  };
+
+  // Determine selected option from URL
+  useEffect(() => {
+    const path = location.pathname;
+    const options = [
+      { path: '/task', option: 'Task' },
+      { path: '/crew', option: 'Crew' },
+      { path: '/document', option: 'Document' },
+      { path: '/expenses', option: 'Expenses' },
+      { path: '/profit', option: 'Profit' },
+      { path: '/notes', option: 'Notes' },
+      { path: '', option: 'Job Details' },
+    ];
+    const matchedOption = options.find((opt) => path.includes(opt.path))?.option || 'Job Details';
+    setSelectedOption(matchedOption);
+  }, [location.pathname]);
+
+  // Handle option selection
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option);
+    if (option === 'Job Details') {
+      navigate(`/jobs/${id}`);
+    } else {
+      navigate(`/jobs/${id}/${option.toLowerCase()}`);
+    }
+  };
+
+  // Handle edit job
+  const handleEditJob = () => {
+    setJobToEdit(job);
+    setIsCreateJobModalOpen(true);
+  };
+
+  // Handle back navigation
+  const handleBack = () => navigate('/jobs');
+
+  if (!job) {
+    return (
+      <div className="w-full max-w-4xl mx-auto py-8 text-center text-lg text-gray-500">
+        Job not found
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Project Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Work className="text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                  Kitchen Renovation
-                </h1>
-                <p className="text-gray-600 mb-1">Client: Smith Family</p>
-                <p className="text-sm text-gray-500">Active Jan 15, 2024 - Mar 15, 2024</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600 mb-1">Total Budget</div>
-              <div className="text-2xl font-bold text-green-600">$45,000</div>
-            </div>
-          </div>
-        </div>
+        {/* Job Header */}
+        <JobHeader 
+          job={job} 
+          onBack={handleBack} 
+          onEdit={handleEditJob} 
+        />
 
         {/* Financial Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Budget Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-gray-700 font-medium mb-2">Total Budget</h3>
-            <div className="text-3xl font-bold text-gray-900">$45,000</div>
-          </div>
+        <FinancialCards job={job} />
 
-          {/* Profit Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-gray-700 font-medium mb-2">Profit</h3>
-            <div className="text-3xl font-bold text-green-600">$8,500</div>
-          </div>
+        {/* Job Dropdown Navigation */}
+        <JobDropdown
+          selectedOption={selectedOption}
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+          onOptionSelect={handleOptionSelect}
+        />
 
-          {/* Amount Received Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-gray-700 font-medium mb-2">Amount Received</h3>
-            <div className="text-3xl font-bold text-red-600">$53,500</div>
-          </div>
+        {/* Job Content */}
+        <JobContent
+          selectedOption={selectedOption}
+          job={job}
+          crewList={crewList}
+          selectedTaskFilter={selectedTaskFilter}
+          isTaskFilterOpen={isTaskFilterOpen}
+          setIsTaskFilterOpen={setIsTaskFilterOpen}
+          setSelectedTaskFilter={setSelectedTaskFilter}
+          crewModalOpen={crewModalOpen}
+          setCrewModalOpen={setCrewModalOpen}
+          selectedCrew={selectedCrew}
+          setSelectedCrew={setSelectedCrew}
+        />
 
-          {/* Remaining Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-gray-700 font-medium mb-2">Remaining</h3>
-            <div className="text-3xl font-bold text-purple-600">$0</div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 mb-8">
-          <CustomButton
-            leftIcon={<ArrowBack />}
-            color="#F0F1F4"
-            textColor="#374151"
-            className="px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-          >
-            Back To Job
-          </CustomButton>
-          <CustomButton
-            leftIcon={<Edit />}
-            color="#2563eb"
-            textColor="#ffffff"
-            className="px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
-          >
-            Edit Job
-          </CustomButton>
-        </div>
-
-        {/* Job Information Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Job Overview</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Project Details */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Details</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Project Name:</span>
-                  <span className="text-gray-900 font-medium">Kitchen Renovation</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Client:</span>
-                  <span className="text-gray-900 font-medium">Smith Family</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Start Date:</span>
-                  <span className="text-gray-900 font-medium">Jan 15, 2024</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Expected Completion:</span>
-                  <span className="text-gray-900 font-medium">Mar 15, 2024</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Summary */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Budget:</span>
-                  <span className="text-green-600 font-medium">$45,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Spent:</span>
-                  <span className="text-red-600 font-medium">$32,500</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Remaining:</span>
-                  <span className="text-blue-600 font-medium">$12,500</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Profit:</span>
-                  <span className="text-purple-600 font-medium">$8,500</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Edit Job Modal */}
+        <EditJobModal
+          isOpen={isCreateJobModalOpen}
+          onClose={() => {
+            setIsCreateJobModalOpen(false);
+            setJobToEdit(null);
+          }}
+          onSave={handleSave}
+          editData={jobToEdit}
+        />
       </div>
     </div>
   );
