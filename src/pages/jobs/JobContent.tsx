@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { KeyboardArrowDown, Close, Delete } from '@mui/icons-material';
 import CustomButton from '../../components/Button';
 import CreateTaskModal from './CreateTaskModal';
+import DownloadIcon from '@mui/icons-material/Download';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface JobContentProps {
   selectedOption: string;
@@ -58,6 +61,14 @@ const JobContent: React.FC<JobContentProps> = ({
       hours: '2/4h',
     },
   ]);
+
+  // Expense filter states
+  const [categoryFilterOpen, setCategoryFilterOpen] = useState(false);
+  const [statusFilterOpen, setStatusFilterOpen] = useState(false);
+  const [reimbursableFilterOpen, setReimbursableFilterOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [selectedStatus, setSelectedStatus] = useState('All Status');
+  const [selectedReimbursable, setSelectedReimbursable] = useState('All');
 
   const handleAddTask = () => {
     setEditingTask(null);
@@ -503,34 +514,340 @@ const JobContent: React.FC<JobContentProps> = ({
   );
 
   const renderExpensesContent = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Expenses</h3>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-          <div>
-            <h4 className="font-medium text-gray-900">Materials</h4>
-            <p className="text-sm text-gray-600">Deck lumber and hardware</p>
-          </div>
-          <span className="text-red-600 font-medium">$8,500</span>
+    <div className="space-y-6">
+     
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-gray-700 font-medium mb-2">Total Expenses</h3>
+          <div className="text-2xl font-bold text-green-600">$1,100.8</div>
         </div>
-        <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-          <div>
-            <h4 className="font-medium text-gray-900">Labor</h4>
-            <p className="text-sm text-gray-600">Crew wages and overtime</p>
-          </div>
-          <span className="text-red-600 font-medium">$2,500</span>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-gray-700 font-medium mb-2">Pending Approval</h3>
+          <div className="text-2xl font-bold text-purple-600">$85.3</div>
         </div>
-        <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-          <div>
-            <h4 className="font-medium text-gray-900">Equipment</h4>
-            <p className="text-sm text-gray-600">Tools and machinery rental</p>
-          </div>
-          <span className="text-red-600 font-medium">$500</span>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-gray-700 font-medium mb-2">Paid Expenses</h3>
+          <div className="text-2xl font-bold text-red-600">1</div>
         </div>
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center">
-            <span className="font-semibold text-gray-900">Total Expenses:</span>
-            <span className="text-red-600 font-bold text-lg">{job.expenses}</span>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-gray-700 font-medium mb-2">Reimbursable</h3>
+          <div className="text-2xl font-bold text-orange-600">$85.3</div>
+        </div>
+      </div>
+
+      {/* Expense Management Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        {/* Heading above filter bar */}
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-lg font-semibold whitespace-nowrap mr-2">Expense Management</span>
+          {/* Categories Dropdown */}
+          <div className="relative">
+            <CustomButton
+              rightIcon={<KeyboardArrowDown />}
+              color="#E5E7EB"
+              textColor="#374151"
+              className="px-4 py-2 rounded-lg font-medium"
+              onClick={() => setCategoryFilterOpen(!categoryFilterOpen)}
+            >
+              {selectedCategory}
+            </CustomButton>
+            {categoryFilterOpen && (
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                {['All Categories', 'Materials', 'Labor', 'Subcontractor', 'Equipment', 'Permits', 'Meals', 'Transportation', 'Repairs', 'Other'].map((category) => (
+                  <button
+                    key={category}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-50 ${
+                      selectedCategory === category 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setCategoryFilterOpen(false);
+                    }}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Status Dropdown */}
+          <div className="relative">
+            <CustomButton
+              rightIcon={<KeyboardArrowDown />}
+              color="#E5E7EB"
+              textColor="#374151"
+              className="px-4 py-2 rounded-lg font-medium"
+              onClick={() => setStatusFilterOpen(!statusFilterOpen)}
+            >
+              {selectedStatus}
+            </CustomButton>
+            {statusFilterOpen && (
+              <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                {['All Status', 'Pending', 'Approved', 'Paid', 'Rejected'].map((status) => (
+                  <button
+                    key={status}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-50 ${
+                      selectedStatus === status 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setSelectedStatus(status);
+                      setStatusFilterOpen(false);
+                    }}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Reimbursable Dropdown */}
+          <div className="relative">
+            <CustomButton
+              rightIcon={<KeyboardArrowDown />}
+              color="#E5E7EB"
+              textColor="#374151"
+              className="px-4 py-2 rounded-lg font-medium"
+              onClick={() => setReimbursableFilterOpen(!reimbursableFilterOpen)}
+            >
+              {selectedReimbursable}
+            </CustomButton>
+            {reimbursableFilterOpen && (
+              <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                {['All', 'Reimbursable', 'Non-Reimbursable'].map((option) => (
+                  <button
+                    key={option}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-50 ${
+                      selectedReimbursable === option 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setSelectedReimbursable(option);
+                      setReimbursableFilterOpen(false);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <CustomButton
+            color="#3B82F6"
+            textColor="#ffffff"
+            className="px-4 py-2 rounded-lg font-medium"
+          >
+            + Add Expense
+          </CustomButton>
+        </div>
+
+        {/* Expense Entries */}
+        <div className="space-y-4">
+          {/* Emergency Plumbing Repair */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="font-medium text-gray-900">Emergency Plumbing Repair</h4>
+                  <span className="text-green-600 font-medium flex items-center gap-1">
+                    <span className="text-sm">$</span>
+                    $320
+                  </span>
+                </div>
+                <div className="flex gap-2 mb-2">
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-gray-500">🔧</span>
+                    Repairs
+                  </span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-xs">✓</span>
+                    Approved
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">Fix Burst Pipe Discovered During Renovation</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>📅</span>
+                    2024-01-20
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span>💳</span>
+                    Company Card
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-purple-500">🏷️</span>
+                    Quick Fix Plumbing
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <a href="#" className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1">
+                    <span>📄</span>
+                    Plumbing_emergency.Pdf
+                    <span>⬇️</span>
+                  </a>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <CustomButton
+                  rightIcon={<KeyboardArrowDown />}
+                  color="#3B82F6"
+                  textColor="#ffffff"
+                  className="px-3 py-1 text-sm rounded"
+                >
+                  Approved
+                </CustomButton>
+                <div className="flex gap-2">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DownloadIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <EditIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DeleteIcon fontSize="small" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Lunch For Crew */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="font-medium text-gray-900">Lunch For Crew</h4>
+                  <span className="text-green-600 font-medium flex items-center gap-1">
+                    <span className="text-sm">$</span>
+                    $85.3
+                  </span>
+                </div>
+                <div className="flex gap-2 mb-2">
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-gray-500">🍽️</span>
+                    Meals
+                  </span>
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-xs">⏰</span>
+                    Pending
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-xs">💲</span>
+                    Reimbursable
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">Team Lunch During Extended Work Day</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>📅</span>
+                    2024-01-18
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span>💵</span>
+                    Cash
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-purple-500">🏷️</span>
+                    Local Deli
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <CustomButton
+                  rightIcon={<KeyboardArrowDown />}
+                  color="#3B82F6"
+                  textColor="#ffffff"
+                  className="px-3 py-1 text-sm rounded"
+                >
+                  Pending
+                </CustomButton>
+                <div className="flex gap-2">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DownloadIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <EditIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DeleteIcon fontSize="small" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Cabinet Hardware */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="font-medium text-gray-900">Cabinet Hardware</h4>
+                  <span className="text-green-600 font-medium flex items-center gap-1">
+                    <span className="text-sm">$</span>
+                    $245.5
+                  </span>
+                </div>
+                <div className="flex gap-2 mb-2">
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-gray-500">🔧</span>
+                    Materials
+                  </span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center gap-1">
+                    <span className="text-xs">✓</span>
+                    Approved
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">Brushed Nickel Handles And Hinges For Kitchen Cabinets</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>📅</span>
+                    2024-01-15
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span>💳</span>
+                    Company Card
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-purple-500">🏷️</span>
+                    Home Depot
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <a href="#" className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1">
+                    <span>📄</span>
+                    Receipt_hardware_001.Pdf
+                    <span>⬇️</span>
+                  </a>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <CustomButton
+                  rightIcon={<KeyboardArrowDown />}
+                  color="#3B82F6"
+                  textColor="#ffffff"
+                  className="px-3 py-1 text-sm rounded"
+                >
+                  Approved
+                </CustomButton>
+                <div className="flex gap-2">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DownloadIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <EditIcon fontSize="small" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <DeleteIcon fontSize="small" />
+                  </button>
+                </div>
+              </div>
+        </div>
           </div>
         </div>
       </div>
@@ -618,4 +935,4 @@ const JobContent: React.FC<JobContentProps> = ({
   return contentMap[selectedOption as keyof typeof contentMap]?.() || null;
 };
 
-export default JobContent; 
+export default JobContent;
