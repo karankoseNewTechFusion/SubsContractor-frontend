@@ -1,56 +1,50 @@
-import React, { useState } from 'react';
-import { Business, Save, Upload, Image } from '@mui/icons-material';
-import CustomButton from '../components/Button';
+import React, { useState } from "react";
+import { Business, Save, Upload, Image } from "@mui/icons-material";
+import CustomButton from "../components/Button";
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState('company');
+  const [activeTab, setActiveTab] = useState("company");
   const [companyInfo, setCompanyInfo] = useState({
-    companyName: 'Your Construction Company',
-    primaryContact: 'John Contractor',
-    phoneNumber: '(555) 123-4567',
-    emailAddress: 'John@Yourcompany.Com',
-    businessAddress: '123 Builder Street\nConstruction City, ST 12345',
-    licenseNumber: 'LIC-123456789',
-    insurancePolicy: 'POL-987654321',
-    companyLogo: null as File | null
+    companyName: "Your Construction Company",
+    primaryContact: "John Contractor",
+    phoneNumber: "(555) 123-4567",
+    emailAddress: "John@Yourcompany.Com",
+    businessAddress: "123 Builder Street\nConstruction City, ST 12345", 
+    licenseNumber: "LIC-123456789",
+    insurancePolicy: "POL-987654321",
+    companyLogo: null as File | null,
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setCompanyInfo(prev => ({
+    setCompanyInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setCompanyInfo(prev => ({
+      setCompanyInfo((prev) => ({
         ...prev,
-        companyLogo: file
+        companyLogo: file,
       }));
     }
   };
 
   const handleSave = () => {
-    console.log('Saving company info:', companyInfo);
+    console.log("Saving company info:", companyInfo);
     // Here you would typically save to backend
   };
 
-
-
-  const tabs = [
-    { key: 'company', label: 'Company Info' }
-  ];
+  const tabs = [{ key: "company", label: "Company Info" }];
 
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="w-full max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Settings
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
           <p className="text-gray-600 text-lg">
             Manage Your Company Information And Profile
           </p>
@@ -66,8 +60,8 @@ const Settings = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex-1 px-6 py-4 text-base font-medium transition-colors ${
                   activeTab === tab.key
-                    ? 'bg-gray-200 text-black border-b-2 border-white-600'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    ? "bg-gray-200 text-black border-b-2 border-white-600"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 {tab.label}
@@ -77,7 +71,7 @@ const Settings = () => {
 
           {/* Tab Content */}
           <div className="p-8">
-            {activeTab === 'company' && (
+            {activeTab === "company" && (
               <div>
                 {/* Company Information Header */}
                 <div className="flex items-center gap-3 mb-6">
@@ -136,7 +130,9 @@ const Settings = () => {
                       <input
                         type="text"
                         value={companyInfo.companyName}
-                        onChange={(e) => handleInputChange('companyName', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("companyName", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -148,7 +144,9 @@ const Settings = () => {
                       <input
                         type="text"
                         value={companyInfo.primaryContact}
-                        onChange={(e) => handleInputChange('primaryContact', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("primaryContact", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -160,7 +158,9 @@ const Settings = () => {
                       <input
                         type="tel"
                         value={companyInfo.phoneNumber}
-                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phoneNumber", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -172,7 +172,9 @@ const Settings = () => {
                       <input
                         type="email"
                         value={companyInfo.emailAddress}
-                        onChange={(e) => handleInputChange('emailAddress', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("emailAddress", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -186,7 +188,9 @@ const Settings = () => {
                       </label>
                       <textarea
                         value={companyInfo.businessAddress}
-                        onChange={(e) => handleInputChange('businessAddress', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("businessAddress", e.target.value)
+                        }
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />
@@ -199,7 +203,9 @@ const Settings = () => {
                       <input
                         type="text"
                         value={companyInfo.licenseNumber}
-                        onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("licenseNumber", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -211,7 +217,9 @@ const Settings = () => {
                       <input
                         type="text"
                         value={companyInfo.insurancePolicy}
-                        onChange={(e) => handleInputChange('insurancePolicy', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("insurancePolicy", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -239,4 +247,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;

@@ -153,7 +153,7 @@ const Referral = () => {
           <p className="text-gray-600 mb-6">
             Track Your Progress And Unlock Rewards
           </p>
-          
+      
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
               <div className="mb-4">

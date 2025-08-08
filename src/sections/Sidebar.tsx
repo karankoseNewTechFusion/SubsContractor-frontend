@@ -62,7 +62,8 @@ const Sidebar = () => {
         } fixed inset-y-0 left-0 z-50 bg-white shadow-xl transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+        {        /* padding-rigth:0 i added toh fix toggle button */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white" style={{paddingRight: '0px'}}>
           <div
             className={`flex items-center gap-3 ${
               collapsed ? "justify-center" : ""

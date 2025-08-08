@@ -24,6 +24,8 @@ import InvoiceDetail from "./pages/invoicing/InvoiceDetail";
 import Referral from "./pages/referral/Referral";
 import Settings from "./pages/Settings";
 import Logout from "./pages/Logout";
+import MaterialsTab from "./pages/materials/MaterialsTab";
+import VendorsTab from "./pages/materials/VendorsTab";
 
 export const router = createBrowserRouter([
   {
@@ -89,7 +91,19 @@ export const router = createBrowserRouter([
         ]
       },
       { path: "scheduling", element: <Scheduling /> },
-      { path: "materials", element: <Materials /> },
+      // { path: "materials", element: <Materials /> },
+   
+{
+  path: "materials",
+  element: <Materials />,
+  children: [
+    { index: true, element: <Navigate to="material-list" replace /> }, // Optional default redirect
+    { path: "material-list", element: <MaterialsTab /> },
+    { path: "vendors", element: <VendorsTab /> },
+  ],
+},
+
+
       // { path: 'job-notes', element: <JobNotes /> },
       { path: "document", element: <Document /> },
       {
